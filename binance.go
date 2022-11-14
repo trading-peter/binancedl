@@ -34,10 +34,12 @@ func main() {
 	ticker := ""
 	year := 0
 	res := ""
+	unixTs := false
 
 	flag.StringVar(&ticker, "ticker", "", "Ticker to pull data from. For example BTCUSDT.")
 	flag.IntVar(&year, "year", 0, "Year to pull.")
 	flag.StringVar(&res, "res", "1s", "Resolution to pull.")
+	flag.BoolVar(&unixTs, "unix", false, "Print unix timestamps instead.")
 	flag.Parse()
 
 	if ticker == "" || year == 0 || res == "" {
@@ -72,14 +74,25 @@ func main() {
 				break
 			}
 
-			csvWriter.Write([]string{
-				time.Unix(resp[i].OpenTime/1000, 0).UTC().String(),
-				resp[i].Open,
-				resp[i].High,
-				resp[i].Low,
-				resp[i].Close,
-				resp[i].Volume,
-			})
+			if unixTs {
+				csvWriter.Write([]string{
+					fmt.Sprintf("%d", resp[i].OpenTime/1000),
+					resp[i].Open,
+					resp[i].High,
+					resp[i].Low,
+					resp[i].Close,
+					resp[i].Volume,
+				})
+			} else {
+				csvWriter.Write([]string{
+					time.Unix(resp[i].OpenTime/1000, 0).UTC().String(),
+					resp[i].Open,
+					resp[i].High,
+					resp[i].Low,
+					resp[i].Close,
+					resp[i].Volume,
+				})
+			}
 		}
 
 		start = time.Unix(resp[len(resp)-1].OpenTime/1000, 0).UTC()
